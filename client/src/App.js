@@ -1,9 +1,11 @@
 import React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import './App.scss';
+import SpotifyWebApi from 'spotify-web-api-js';
+const spotifyApi = new SpotifyWebApi();
 
 function App() {
-  function getHashParams() {
+  const getHashParams = () => {
     var hashParams = {};
     var e,
       r = /([^&;=]+)=?([^&;]*)/g,
@@ -14,9 +16,23 @@ function App() {
       e = r.exec(q);
     }
     return hashParams;
-  }
+  };
 
-  return <div className="App">Hello world</div>;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const params = getHashParams();
+    const token = params.access_token;
+    if (token) {
+      spotifyApi.setAccessToken(token);
+    }
+  });
+
+  return (
+    <div className="App">
+      <a href="http://localhost:8888/login">Login</a>
+    </div>
+  );
 }
 
 export default App;
