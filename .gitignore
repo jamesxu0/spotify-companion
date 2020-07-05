@@ -24,3 +24,6 @@ client/yarn-error.log*
 
 
 auth-server/node_modules
+
+.DS_Store
+.prettierrc
