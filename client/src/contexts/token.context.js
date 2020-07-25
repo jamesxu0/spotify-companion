@@ -1,5 +1,5 @@
 import { createContext } from 'react';
 
-const accessToken = createContext(accessToken);
+const TokenContext = createContext('');
 
-export default accessToken;
+export default TokenContext;

@@ -1,8 +1,11 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { Switch, Route } from 'react-router-dom';
+import TokenContent from './contexts/token.context';
+import HomePage from './pages/HomePage/HomePage';
+import StatsPage from './pages/StatsPage/StatsPage';
+import MergePage from './pages/MergePage/MergePage';
+import LoginPage from './pages/LoginPage/LoginPage';
 import './App.scss';
-import SpotifyWebApi from 'spotify-web-api-js';
-const spotifyApi = new SpotifyWebApi();
 
 function App() {
   const getHashParams = () => {
@@ -17,21 +20,19 @@ function App() {
     }
     return hashParams;
   };
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const params = getHashParams();
-    const token = params.access_token;
-    if (token) {
-      spotifyApi.setAccessToken(token);
-    }
-  });
-
-  return (
+  const token = getHashParams().access_token;
+  return token !== undefined ? (
     <div className="App">
-      <a href="http://localhost:8888/login">Login</a>
+      <Switch>
+        <TokenContent.Provider value={token}>
+          <Route exact path="/" component={HomePage} />
+          <Route path="/merge" component={MergePage} />
+          <Route path="/stats" component={StatsPage} />
+        </TokenContent.Provider>
+      </Switch>
     </div>
+  ) : (
+    <LoginPage />
   );
 }
 
