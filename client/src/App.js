@@ -1,6 +1,5 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import TokenContent from './contexts/token.context';
 import HomePage from './pages/HomePage/HomePage';
 import StatsPage from './pages/StatsPage/StatsPage';
 import MergePage from './pages/MergePage/MergePage';
@@ -21,18 +20,19 @@ function App() {
     return hashParams;
   };
   const token = getHashParams().access_token;
-  return token !== undefined ? (
+  if (!sessionStorage.getItem('spotify-companion-access-token')) {
+    if (!token) return LoginPage();
+    sessionStorage.setItem('spotify-companion-access-token', token);
+  }
+  return (
     <div className="App">
       <Switch>
-        <TokenContent.Provider value={token}>
-          <Route exact path="/" component={HomePage} />
-          <Route path="/merge" component={MergePage} />
-          <Route path="/stats" component={StatsPage} />
-        </TokenContent.Provider>
+        <Route exact path="/" component={HomePage} />
+        <Route path="/merge" component={MergePage} />
+        <Route path="/stats" component={StatsPage} />
+        <Route path="/login" component={LoginPage} />
       </Switch>
     </div>
-  ) : (
-    <LoginPage />
   );
 }
 
