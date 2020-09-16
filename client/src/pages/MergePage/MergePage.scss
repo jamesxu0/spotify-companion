@@ -1,0 +1,36 @@
+.mergeContainer {
+  min-width: 600px;
+  .playlistContainer {
+    display: flex;
+    margin: 0 auto;
+    width: 70%;
+    position: relative;
+    .mergeOptions {
+      height: 30px;
+      margin-top: 200px;
+    }
+    .songCount {
+      margin-top: 0;
+    }
+    .leftPlaylistContainer {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .rightPlaylistContainer {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .playlistList {
+      height: 600px;
+      overflow-y: scroll;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+}
