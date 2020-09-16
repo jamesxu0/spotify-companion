@@ -1,22 +1,38 @@
 import React from 'react';
 import './MergePage.scss';
 import PlayListComponent from './../../components/PlaylistComponent/PlaylistComponent';
-import { getSpotifyAPI } from './../../utils/SpotifyApiUtils';
+import {
+  getSpotifyAPI,
+  getAllTracksFromPlaylist,
+} from './../../utils/SpotifyApiUtils';
+import Modal from 'react-modal';
 import { useState } from 'react';
+
+Modal.setAppElement('#root');
+
+const customStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
+  },
+};
 
 function MergePage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [userURI, setUserURI] = useState('');
   const [mePlaylists, setMePlaylists] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
+  const [modalIsOpen, setIsOpen] = useState(false);
   const spotifyApi = getSpotifyAPI();
   const handleOnSubmit = async (e) => {
     e.preventDefault();
-    const userURIs = userURI.split(':');
-    const userID = userURIs[userURIs.length - 1];
     const mePlaylistsResponse = await spotifyApi.getUserPlaylists();
     const userPlaylistsResponse = await spotifyApi.getUserPlaylists(
-      userID,
+      userURI,
     );
     setMePlaylists(
       mePlaylistsResponse.items.map((item) => {
@@ -32,6 +48,29 @@ function MergePage() {
     );
     setHasSearched(true);
   };
+  const meSelectedPlaylists = mePlaylists.filter(
+    (playlist) => playlist.selected,
+  );
+  const userSelectedPlaylists = userPlaylists.filter(
+    (playlist) => playlist.selected,
+  );
+  const handleMergeButtonClick = async () => {
+    setIsOpen(true);
+    const meTracks = await Promise.all(
+      meSelectedPlaylists.map(
+        async (playlist) =>
+          await getAllTracksFromPlaylist(spotifyApi, playlist.id),
+      ),
+    );
+    const userTracks = await Promise.all(
+      userSelectedPlaylists.map(
+        async (playlist) =>
+          await getAllTracksFromPlaylist(spotifyApi, playlist.id),
+      ),
+    );
+    console.log(meTracks.flat());
+    console.log(userTracks.flat());
+  };
   let meSongCount = 0;
   let userSongCount = 0;
   mePlaylists.forEach((playlist) => {
@@ -46,6 +85,16 @@ function MergePage() {
   });
   return (
     <div className="mergeContainer">
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={() => {
+          setIsOpen(false);
+        }}
+        style={customStyles}
+        contentLabel="Example Modal"
+      >
+        Hello
+      </Modal>
       <h1>MERGE</h1>
       <form onSubmit={handleOnSubmit}>
         <label>
@@ -98,10 +147,18 @@ function MergePage() {
           ) : null}
         </div>
         {hasSearched && (
-          <select className="mergeOptions">
-            <option value="intersect">Intersect</option>
-            <option value="union">Union</option>
-          </select>
+          <div className="mergeButtons">
+            <select className="mergeOptions">
+              <option value="intersect">Intersect</option>
+              <option value="union">Union</option>
+            </select>
+            {meSelectedPlaylists.length !== 0 &&
+              userSelectedPlaylists.length !== 0 && (
+                <button onClick={handleMergeButtonClick}>
+                  Merge
+                </button>
+              )}
+          </div>
         )}
         <div className="rightPlaylistContainer">
           {userPlaylists.length !== 0 ? (
