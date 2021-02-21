@@ -17,6 +17,8 @@ const customStyles = {
     right: 'auto',
     bottom: 'auto',
     marginRight: '-50%',
+    overflow: 'scroll',
+    height: '75%',
     transform: 'translate(-50%, -50%)',
   },
 };
@@ -27,6 +29,7 @@ function MergePage() {
   const [mePlaylists, setMePlaylists] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [modalIsOpen, setIsOpen] = useState(false);
+  const [mergedPlaylist, setMergePlaylist] = useState([]);
   const spotifyApi = getSpotifyAPI();
   const handleOnSubmit = async (e) => {
     e.preventDefault();
@@ -68,8 +71,19 @@ function MergePage() {
           await getAllTracksFromPlaylist(spotifyApi, playlist.id),
       ),
     );
-    console.log(meTracks.flat());
-    console.log(userTracks.flat());
+    const meSet = new Set();
+    meTracks.flat().forEach((song) => {
+      if (!meSet.has(song.track.id)) {
+        meSet.add(song.track.id);
+      }
+    });
+    const mergedSongs = [];
+    userTracks.flat().forEach((song) => {
+      if (meSet.has(song.track.id)) {
+        mergedSongs.push(song);
+      }
+    });
+    setMergePlaylist(mergedSongs);
   };
   let meSongCount = 0;
   let userSongCount = 0;
@@ -83,6 +97,24 @@ function MergePage() {
       userSongCount += playlist.tracks.total;
     }
   });
+  const handleCreatePlaylist = async () => {
+    const me = await spotifyApi.getMe();
+    console.log(me);
+    const createdPlaylist = await spotifyApi.createPlaylist(me.id, {
+      name: `Merged playlist with ${userURI}`,
+    });
+    console.log(mergedPlaylist);
+    let songCount = 0;
+    while (songCount < mergedPlaylist.length) {
+      await spotifyApi.addTracksToPlaylist(
+        createdPlaylist.id,
+        mergedPlaylist
+          .slice(songCount, songCount + 100)
+          .map((song) => song.track.uri),
+      );
+      songCount += 100;
+    }
+  };
   return (
     <div className="mergeContainer">
       <Modal
@@ -93,7 +125,18 @@ function MergePage() {
         style={customStyles}
         contentLabel="Example Modal"
       >
-        Hello
+        <h2>{mergedPlaylist.length} common songs</h2>
+        <button onClick={handleCreatePlaylist}>
+          Create Playlist
+        </button>
+        {mergedPlaylist.map((song) => {
+          console.log(song);
+          return (
+            <h3>
+              {song.track.name} - {song.track.artists[0].name}
+            </h3>
+          );
+        })}
       </Modal>
       <h1>MERGE</h1>
       <form onSubmit={handleOnSubmit}>

@@ -5,20 +5,20 @@ import { getSpotifyAPI } from './../../utils/SpotifyApiUtils';
 
 function HomePage({ history }) {
   const spotifyApi = getSpotifyAPI();
-  const [response, setResponse] = useState(null);
+  const [meResponse, setMeResponse] = useState(null);
   useEffect(() => {
     async function fetchMe() {
-      setResponse(await spotifyApi.getMe());
+      setMeResponse(await spotifyApi.getMe());
     }
     fetchMe();
   }, []);
   return (
     <div>
       <h1>HOME</h1>
-      {response != null && (
+      {meResponse != null && (
         <div>
-          <h2>{response.display_name}</h2>
-          <img src={response.images[0].url} />
+          <h2>{meResponse.display_name}</h2>
+          <img src={meResponse.images[0].url} />
         </div>
       )}
       <h2

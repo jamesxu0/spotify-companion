@@ -20,9 +20,11 @@ function App() {
     return hashParams;
   };
   const token = getHashParams().access_token;
-  if (!sessionStorage.getItem('spotify-companion-access-token')) {
-    if (!token) return LoginPage();
+  if (token) {
     sessionStorage.setItem('spotify-companion-access-token', token);
+  }
+  if (!sessionStorage.getItem('spotify-companion-access-token')) {
+    return LoginPage();
   }
   return (
     <div className="App">
